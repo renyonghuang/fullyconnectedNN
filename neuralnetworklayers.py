@@ -61,7 +61,7 @@ class FullyConnectedLayer:
     def backward(self, gradient_data): 
         # gradient_data = delta_l
         self.gW = np.dot(gradient_data, np.transpose(self.input_data))
-        self.gb = gradient_data
+        self.gb = np.sum(gradient_data, axis=1, keepdims=True)
         self.gI = np.dot(np.transpose(self.W), gradient_data)
         return self.gI
 
@@ -117,7 +117,7 @@ class SoftmaxOutput_CrossEntropyLossLayer:
         # We use multidimensional array indexing to extract 
         # softmax probability of the correct label for each sample.
         # Refer to https://docs.scipy.org/doc/numpy/user/basics.indexing.html#indexing-multi-dimensional-arrays for understanding multidimensional array indexing.
-        log_likelihood = -np.log(p[y, range(m)])
+        log_likelihood = -np.log(p[[int(elem) for elem in y], range(m)])
         loss = np.sum(log_likelihood) / m
         return loss
     
@@ -130,7 +130,7 @@ class SoftmaxOutput_CrossEntropyLossLayer:
         """
         m = len(y)
         grad = p.copy()
-        grad[y, range(m)] -= 1
+        grad[[int(elem) for elem in y], range(m)] -= 1
         grad = grad/m
         return grad
     
@@ -142,13 +142,14 @@ class SoftmaxOutput_CrossEntropyLossLayer:
         """
         X is the output from fully connected layer (num_classes x num_examples)
         """
-        print(X)
+        #print(X)
         self.input_data = X
         self.output_data = self.softmax(X) # output data: p
         self.y = label_data
         self.pred = self.output_data.argmax(axis = 0)
         self.loss = self.cross_entropy_loss(self.output_data, label_data)
-        return self.loss
+        self.accuracy = sum(self.pred == self.y) *1.0/len(self.y)
+        return self.loss, self.accuracy
     
     def backward(self): 
         self.gI = self.delta_cross_entropy(self.output_data, self.y)

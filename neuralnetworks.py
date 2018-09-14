@@ -59,10 +59,15 @@ def diff_dw(network, gW_df, gb_df):
         print('gWs in network correspond to gWs in correct answer')
     else: 
         print('gWs in network do not correspond to gWs in correct answer')
+        return False
+    
     if gb_same is True: 
         print('gbs in network correspond to gbs in correct answer')
     else: 
         print('gbs in network do not correspond to gbs in correct answer')
+        return False
+        
+    return True
     
 
 def reset_layers(network): 
@@ -76,8 +81,8 @@ def network_forward(network, input_data, label_data=None, phase='train'):
         if type(layer) is not SoftmaxOutput_CrossEntropyLossLayer:
             input_data = layer.forward(input_data)
         else:
-            loss = layer.evaluate(input_data, label_data, phase)
-    return (network, loss)
+            loss, accuracy = layer.evaluate(input_data, label_data, phase)
+    return (loss, accuracy)
 
 def network_backward(network): 
     for layer in reversed(network): 
@@ -87,13 +92,13 @@ def network_backward(network):
             gradient = layer.backward(gradient)
     return network 
     
-def gradient_descent(network, decay=1.0): 
+def gradient_descent(network, decay=1.0, n = 1): 
     '''Stochastic or mini-batch Gradient Descent'''
     for layer in reversed(network):
         if type(layer) is FullyConnectedLayer: 
             layer.lr *= decay
-            layer.W -= layer.lr * layer.gW
-            layer.b -= layer.lr * layer.gb
+            layer.W -= layer.lr * layer.gW 
+            layer.b -= layer.lr * layer.gb 
         else:
             continue
     return network
@@ -103,9 +108,9 @@ def network_momentum_SGD(network, decay=1.0, rho=0.9):
     for layer in reversed(network): 
         if type(layer) is FullyConnectedLayer: 
             layer.lr *= decay
-            layer.vW = layer.vW * rho + layer.lr * layer.gW
+            layer.vW = layer.vW * rho + layer.lr * layer.gW 
             layer.W -= layer.vW
-            layer.vb = layer.vb * rho + layer.lr * layer.gb
+            layer.vb = layer.vb * rho + layer.lr * layer.gb 
             layer.b -= layer.vb
         else:
             continue
