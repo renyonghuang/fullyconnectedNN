@@ -66,11 +66,28 @@ def partition_train(network, x_train, y_train, x_test, y_test, logger, batch_siz
         
         network_backward(network) 
         # gradient_descent(network, decay = 0.9999)
-        network_momentum_SGD(network, decay=0.9999)
+        network_momentum_SGD(network, decay=0.99)
+    return (training_costs, test_costs, training_accuracies, test_accuracies)
     
-    plotgraphs.plot_graphs(training_costs, test_costs, training_accuracies, test_accuracies)
 
+def epoch(network, x_train, y_train, x_test, y_test, logger, n_epoch, batch_size=100):
+    tr_c = []
+    tst_c = []
+    tr_a = []
+    tst_a = []
+    for i in range(n_epoch):
+        x_train, y_train = shuffle(x_train, y_train, random_state=0)
+        # mini-batch 
+        training_costs, test_costs, training_accuracies, test_accuracies = partition_train(network, x_train, y_train, x_test, y_test, logger, batch_size=100)
+        tr_c = tr_c + training_costs
+        tst_c = tst_c + test_costs
+        tr_a = tr_a + training_accuracies
+        tst_a = tst_a + test_accuracies
 
+    plotgraphs.plot_graphs(tr_c, tst_c, tr_a, tst_a)
+
+    
+    
 if __name__ == '__main__':
     logger = logging.getLogger()
     
@@ -144,8 +161,7 @@ if __name__ == '__main__':
     reset_layers(network_2)
     reset_layers(network_3)
     
-    # mini-batch 
-    partition_train(network_1, x_train, y_train, x_test, y_test, logger, batch_size=100)
+    epoch(network_1, x_train, y_train, x_test, y_test, logger, n_epoch=10, batch_size=10)
     
     # TODO: 
     # network momentum SGD 
