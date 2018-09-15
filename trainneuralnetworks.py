@@ -39,7 +39,7 @@ def compare_dw(network, w_file, b_file):
     return diff_dw(network, w_df, b_df)
     
 def partition_train(network, x_train, y_train, x_test, y_test, logger, batch_size=1): 
-    print('Start training: ')
+    logger.info('Start training: ')
     n_batch = math.ceil(x_train.shape[0]*1.0 / batch_size)
     training_costs = []
     test_costs = []
@@ -83,8 +83,8 @@ def epoch(network, x_train, y_train, x_test, y_test, logger, n_epoch, batch_size
         tst_c = tst_c + test_costs
         tr_a = tr_a + training_accuracies
         tst_a = tst_a + test_accuracies
-
-    plotgraphs.plot_graphs(tr_c, tst_c, tr_a, tst_a)
+    
+    return (tr_c, tst_c, tr_a, tst_a)
 
     
     
@@ -161,10 +161,17 @@ if __name__ == '__main__':
     reset_layers(network_2)
     reset_layers(network_3)
     
-    epoch(network_1, x_train, y_train, x_test, y_test, logger, n_epoch=10, batch_size=10)
+    tr_c_n1, tst_c_n1, tr_a_n1, tst_a_n1 = epoch(network_1, x_train, y_train, x_test, y_test, logger, n_epoch=10, batch_size=10)
+    tr_c_n2, tst_c_n2, tr_a_n2, tst_a_n2 = epoch(network_2, x_train, y_train, x_test, y_test, logger, n_epoch=10, batch_size=10)
+    tr_c_n3, tst_c_n3, tr_a_n3, tst_a_n3 = epoch(network_3, x_train, y_train, x_test, y_test, logger, n_epoch=10, batch_size=10)
+    
     
     # TODO: 
     # network momentum SGD 
+    
+    plotgraphs.plot_graphs(tr_c_n1, tst_c_n1, tr_a_n1, tst_a_n1, tr_c_n2, tst_c_n2, tr_a_n2, tst_a_n2,
+                           tr_c_n3, tst_c_n3, tr_a_n3, tst_a_n3)
+
     
     
     
